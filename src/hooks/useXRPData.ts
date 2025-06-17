@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 export interface TickerData {
@@ -12,18 +11,15 @@ export interface TickerData {
   server_time: number;
 }
 
-export interface CandleData {
+export interface RealtimeData {
   time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
+  price: number;
   volume: number;
 }
 
 export const useXRPData = () => {
   const [tickerData, setTickerData] = useState<TickerData | null>(null);
-  const [candleData, setCandleData] = useState<CandleData[]>([]);
+  const [realtimeData, setRealtimeData] = useState<RealtimeData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +29,20 @@ export const useXRPData = () => {
       if (!response.ok) throw new Error('Failed to fetch ticker data');
       const data = await response.json();
       setTickerData(data.ticker);
+      
+      // Add to realtime data
+      const newPoint: RealtimeData = {
+        time: Date.now(),
+        price: parseFloat(data.ticker.last),
+        volume: parseFloat(data.ticker.vol_xrp)
+      };
+      
+      setRealtimeData(prev => {
+        const updated = [...prev, newPoint];
+        // Keep only last 50 data points
+        return updated.slice(-50);
+      });
+      
       setError(null);
     } catch (err) {
       console.error('Error fetching ticker data:', err);
@@ -40,39 +50,10 @@ export const useXRPData = () => {
     }
   };
 
-  const generateCandleData = () => {
-    // Generate sample candlestick data for demonstration
-    // In a real application, you would fetch this from INDODAX trades API
-    const now = Date.now();
-    const newData: CandleData[] = [];
-    
-    for (let i = 30; i >= 0; i--) {
-      const time = now - (i * 60000); // 1 minute intervals
-      const basePrice = 11000 + Math.sin(i * 0.1) * 500; // Simulate price movement
-      const open = basePrice + (Math.random() - 0.5) * 100;
-      const close = open + (Math.random() - 0.5) * 200;
-      const high = Math.max(open, close) + Math.random() * 50;
-      const low = Math.min(open, close) - Math.random() * 50;
-      const volume = Math.random() * 1000000;
-
-      newData.push({
-        time,
-        open: Math.round(open),
-        high: Math.round(high),
-        low: Math.round(low),
-        close: Math.round(close),
-        volume: Math.round(volume)
-      });
-    }
-    
-    setCandleData(newData);
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       await fetchTickerData();
-      generateCandleData();
       setLoading(false);
     };
 
@@ -81,11 +62,10 @@ export const useXRPData = () => {
     // Update data every 10 seconds
     const interval = setInterval(() => {
       fetchTickerData();
-      generateCandleData();
     }, 10000);
 
     return () => clearInterval(interval);
   }, []);
 
-  return { tickerData, candleData, loading, error };
+  return { tickerData, realtimeData, loading, error };
 };
