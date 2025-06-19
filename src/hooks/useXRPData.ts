@@ -4,7 +4,12 @@ import { useState, useEffect } from 'react';
 export interface TickerData {
   high: string;
   low: string;
-  vol_xrp: string;
+  vol_xrp?: string;
+  vol_btc?: string;
+  vol_eth?: string;
+  vol_bnb?: string;
+  vol_usdt?: string;
+  vol_ada?: string;
   vol_idr: string;
   last: string;
   buy: string;
@@ -55,7 +60,26 @@ export const useXRPData = (cryptoSymbol: keyof typeof CRYPTO_PAIRS = 'XRP') => {
       const currentPrice = parseFloat(data.ticker.last);
       const high = parseFloat(data.ticker.high);
       const low = parseFloat(data.ticker.low);
-      const volume = parseFloat(data.ticker.vol_xrp || data.ticker.vol_btc || data.ticker.vol_eth || '0');
+      
+      // Get volume based on crypto symbol
+      const getVolume = () => {
+        switch (cryptoSymbol) {
+          case 'BTC':
+            return parseFloat(data.ticker.vol_btc || '0');
+          case 'ETH':
+            return parseFloat(data.ticker.vol_eth || '0');
+          case 'BNB':
+            return parseFloat(data.ticker.vol_bnb || '0');
+          case 'USDT':
+            return parseFloat(data.ticker.vol_usdt || '0');
+          case 'ADA':
+            return parseFloat(data.ticker.vol_ada || '0');
+          default:
+            return parseFloat(data.ticker.vol_xrp || '0');
+        }
+      };
+      
+      const volume = getVolume();
       
       const newCandle: CandleData = {
         time: Date.now(),

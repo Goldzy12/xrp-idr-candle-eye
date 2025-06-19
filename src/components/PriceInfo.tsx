@@ -7,9 +7,10 @@ import { formatIDR, formatVolume } from '@/utils/formatters';
 interface PriceInfoProps {
   data: TickerData | null;
   loading: boolean;
+  cryptoSymbol?: string;
 }
 
-export const PriceInfo: React.FC<PriceInfoProps> = ({ data, loading }) => {
+export const PriceInfo: React.FC<PriceInfoProps> = ({ data, loading, cryptoSymbol = 'XRP' }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -29,6 +30,26 @@ export const PriceInfo: React.FC<PriceInfoProps> = ({ data, loading }) => {
   const highPrice = parseFloat(data.high);
   const lowPrice = parseFloat(data.low);
   const isUp = currentPrice > (highPrice + lowPrice) / 2;
+
+  // Get the appropriate volume field based on crypto symbol
+  const getVolumeData = () => {
+    switch (cryptoSymbol) {
+      case 'BTC':
+        return data.vol_btc;
+      case 'ETH':
+        return data.vol_eth;
+      case 'BNB':
+        return data.vol_bnb;
+      case 'USDT':
+        return data.vol_usdt;
+      case 'ADA':
+        return data.vol_ada;
+      default:
+        return data.vol_xrp;
+    }
+  };
+
+  const volumeData = getVolumeData();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -63,10 +84,10 @@ export const PriceInfo: React.FC<PriceInfoProps> = ({ data, loading }) => {
       <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
         <div className="flex items-center text-gray-400 text-sm mb-2">
           <Volume2 className="w-4 h-4 mr-1" />
-          Volume 24h (XRP)
+          Volume 24h ({cryptoSymbol})
         </div>
         <div className="text-2xl font-bold text-blue-400">
-          {formatVolume(data.vol_xrp)}
+          {formatVolume(volumeData)}
         </div>
       </div>
     </div>

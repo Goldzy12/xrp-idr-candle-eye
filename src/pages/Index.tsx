@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Header } from '@/components/Header';
 import { PriceInfo } from '@/components/PriceInfo';
@@ -33,7 +32,7 @@ const Index = () => {
           <CryptoSelector value={selectedCrypto} onValueChange={setSelectedCrypto as any} />
         </div>
         
-        <PriceInfo data={tickerData} loading={loading} />
+        <PriceInfo data={tickerData} loading={loading} cryptoSymbol={selectedCrypto} />
         
         <Tabs defaultValue="chart" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">

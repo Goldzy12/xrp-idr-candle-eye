@@ -9,8 +9,17 @@ export const formatIDR = (amount: number | string): string => {
   }).format(num);
 };
 
-export const formatVolume = (volume: number | string): string => {
+export const formatVolume = (volume: number | string | undefined): string => {
+  if (volume === undefined || volume === null || volume === '') {
+    return '0';
+  }
+  
   const num = typeof volume === 'string' ? parseFloat(volume) : volume;
+  
+  if (isNaN(num)) {
+    return '0';
+  }
+  
   if (num >= 1000000000) {
     return `${(num / 1000000000).toFixed(1)}B`;
   } else if (num >= 1000000) {
