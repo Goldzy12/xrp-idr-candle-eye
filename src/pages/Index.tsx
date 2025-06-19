@@ -2,15 +2,16 @@
 import React, { useState } from 'react';
 import { Header } from '@/components/Header';
 import { PriceInfo } from '@/components/PriceInfo';
-import { RealtimeChart } from '@/components/RealtimeChart';
-import { PricePrediction } from '@/components/PricePrediction';
+import { CandlestickChart } from '@/components/CandlestickChart';
 import { Portfolio } from '@/components/Portfolio';
 import { CryptoNews } from '@/components/CryptoNews';
+import { CryptoSelector } from '@/components/CryptoSelector';
 import { useXRPData } from '@/hooks/useXRPData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
-  const { tickerData, realtimeData, loading, error } = useXRPData();
+  const [selectedCrypto, setSelectedCrypto] = useState<'XRP' | 'BTC' | 'ETH' | 'BNB' | 'USDT' | 'ADA'>('XRP');
+  const { tickerData, candleData, realtimeData, loading, error } = useXRPData(selectedCrypto);
 
   const handleRefresh = () => {
     window.location.reload();
@@ -28,22 +29,21 @@ const Index = () => {
           </div>
         )}
         
+        <div className="mb-6">
+          <CryptoSelector value={selectedCrypto} onValueChange={setSelectedCrypto as any} />
+        </div>
+        
         <PriceInfo data={tickerData} loading={loading} />
         
         <Tabs defaultValue="chart" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-6">
-            <TabsTrigger value="chart">Chart</TabsTrigger>
-            <TabsTrigger value="prediction">Prediksi AI</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="chart">Chart & Volume</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="news">Berita</TabsTrigger>
           </TabsList>
           
           <TabsContent value="chart">
-            <RealtimeChart data={realtimeData} loading={loading} />
-          </TabsContent>
-          
-          <TabsContent value="prediction">
-            <PricePrediction currentPrice={tickerData?.last} />
+            <CandlestickChart data={candleData} loading={loading} cryptoSymbol={selectedCrypto} />
           </TabsContent>
           
           <TabsContent value="portfolio">
