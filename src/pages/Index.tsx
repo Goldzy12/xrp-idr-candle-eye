@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { Header } from '@/components/Header';
 import { PriceInfo } from '@/components/PriceInfo';
-import { CandlestickChart } from '@/components/CandlestickChart';
+import { HistoricalCandlestickChart } from '@/components/HistoricalCandlestickChart';
+import { TimeFrameSelector, TimeFrame } from '@/components/TimeFrameSelector';
 import { Portfolio } from '@/components/Portfolio';
 import { CryptoNews } from '@/components/CryptoNews';
 import { CryptoSelector } from '@/components/CryptoSelector';
 import { useXRPData } from '@/hooks/useXRPData';
+import { useHistoricalData } from '@/hooks/useHistoricalData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
   const [selectedCrypto, setSelectedCrypto] = useState<'XRP' | 'BTC' | 'ETH' | 'BNB' | 'USDT' | 'ADA'>('XRP');
-  const { tickerData, candleData, realtimeData, loading, error } = useXRPData(selectedCrypto);
+  const [selectedTimeframe, setSelectedTimeframe] = useState<TimeFrame>('1h');
+  const { tickerData, loading, error } = useXRPData(selectedCrypto);
+  const { data: historicalData, loading: historicalLoading } = useHistoricalData(selectedCrypto, selectedTimeframe);
 
   const handleRefresh = () => {
     window.location.reload();
@@ -42,7 +46,15 @@ const Index = () => {
           </TabsList>
           
           <TabsContent value="chart">
-            <CandlestickChart data={candleData} loading={loading} cryptoSymbol={selectedCrypto} />
+            <div className="mb-4">
+              <TimeFrameSelector value={selectedTimeframe} onChange={setSelectedTimeframe} />
+            </div>
+            <HistoricalCandlestickChart 
+              data={historicalData} 
+              loading={historicalLoading} 
+              cryptoSymbol={selectedCrypto}
+              timeframe={selectedTimeframe}
+            />
           </TabsContent>
           
           <TabsContent value="portfolio">
