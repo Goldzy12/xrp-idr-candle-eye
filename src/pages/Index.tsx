@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Header } from '@/components/Header';
 import { PriceInfo } from '@/components/PriceInfo';
 import { HistoricalCandlestickChart } from '@/components/HistoricalCandlestickChart';
+import { RealtimeCandlestickChart } from '@/components/RealtimeCandlestickChart';
 import { TimeFrameSelector, TimeFrame } from '@/components/TimeFrameSelector';
 import { Portfolio } from '@/components/Portfolio';
 import { CryptoNews } from '@/components/CryptoNews';
@@ -13,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const Index = () => {
   const [selectedCrypto, setSelectedCrypto] = useState<'XRP' | 'BTC' | 'ETH' | 'BNB' | 'USDT' | 'ADA'>('XRP');
   const [selectedTimeframe, setSelectedTimeframe] = useState<TimeFrame>('1h');
-  const { tickerData, loading, error } = useXRPData(selectedCrypto);
+  const { tickerData, candleData, loading, error } = useXRPData(selectedCrypto);
   const { data: historicalData, loading: historicalLoading } = useHistoricalData(selectedCrypto, selectedTimeframe);
 
   const handleRefresh = () => {
@@ -38,14 +40,23 @@ const Index = () => {
         
         <PriceInfo data={tickerData} loading={loading} cryptoSymbol={selectedCrypto} />
         
-        <Tabs defaultValue="chart" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="chart">Chart & Volume</TabsTrigger>
+        <Tabs defaultValue="realtime" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="realtime">Realtime Chart</TabsTrigger>
+            <TabsTrigger value="historical">Historical Chart</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="news">Berita</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="chart">
+          <TabsContent value="realtime">
+            <RealtimeCandlestickChart 
+              data={candleData} 
+              loading={loading} 
+              cryptoSymbol={selectedCrypto}
+            />
+          </TabsContent>
+          
+          <TabsContent value="historical">
             <div className="mb-4">
               <TimeFrameSelector value={selectedTimeframe} onChange={setSelectedTimeframe} />
             </div>
